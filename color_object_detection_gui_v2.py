@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 import cv2
@@ -16,7 +15,7 @@ COLOR_RANGES = {
     "Green": [
         (np.array([25, 35, 25]), np.array([95, 255, 255]))
     ],
-    # เริ่ม Blue ที่ Hue 96 เพื่อไม่ให้ทับซ้อนกับช่วง Green
+    
     "Blue": [
         (np.array([96, 45, 35]), np.array([135, 255, 255]))
     ]
@@ -303,13 +302,22 @@ class ColorObjectDetector:
         if self.camera_running:
             return
 
-        self.camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        if not self.camera.isOpened():
-            self.camera.release()
-            self.camera = None
+        self.camera = None
+        camera_indices = list(range(1, 6)) + [0]
+        for camera_index in camera_indices:
+            candidate = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+            if candidate.isOpened():
+                ret, test_frame = candidate.read()
+                if ret and test_frame is not None:
+                    self.camera = candidate
+                    break
+            candidate.release()
+
+        if self.camera is None:
             messagebox.showerror(
-                "เปิดกล้องไม่สำเร็จ",
-                "ไม่สามารถเปิด Webcam ได้ กรุณาตรวจสอบการเชื่อมต่อกล้อง"
+                "ไม่พบ Webcam",
+                "ไม่พบ Webcam ที่ใช้งานได้ในเครื่องนี้\\n"
+                "กรุณาเชื่อมต่อกล้องและตรวจสอบการอนุญาตใช้กล้องใน Windows"
             )
             return
 
@@ -325,6 +333,7 @@ class ColorObjectDetector:
         )
         self.update_camera()
 
+
     def update_camera(self):
         if not self.camera_running or self.camera is None:
             return
@@ -339,7 +348,7 @@ class ColorObjectDetector:
         self.current_counts = counts
         self.update_count_labels(counts)
 
-        # แสดงภาพโดยรักษาสัดส่วน ไม่ยืดภาพ
+        
         display_rgb = cv2.cvtColor(processed, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(display_rgb)
         image.thumbnail((900, 390))
@@ -374,7 +383,7 @@ class ColorObjectDetector:
         if not self.camera_running:
             return
 
-        # ใช้จำนวนจากเฟรมล่าสุดที่ประมวลผลได้
+        
         result = {
             "round": len(self.round_history) + 1,
             "Red": int(self.current_counts["Red"]),
