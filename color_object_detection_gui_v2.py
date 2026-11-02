@@ -123,7 +123,7 @@ class ColorObjectDetector:
         )
         self.status_label.pack(side="right", padx=5)
 
-        # พื้นที่ภาพกล้อง + แผงนับจำนวน
+       
         main = tk.Frame(self.root, bg="#eef2f7", height=440)
         main.pack(fill="x", padx=18, pady=(0, 9))
         main.pack_propagate(False)
